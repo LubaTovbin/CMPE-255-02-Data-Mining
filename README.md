@@ -8,3 +8,4 @@ Golden Oak Research Group LLC, “U.S. Income Database Kaggle”. Publication: 5
 Crime datasets:
 https://www.kaggle.com/mikejohnsonjr/united-states-crime-rates-by-county
 https://data.ca.gov/dataset/violent-crime-rate
+https://www.ucrdatatool.gov/Search/Crime/State/StatebyState.cfm
