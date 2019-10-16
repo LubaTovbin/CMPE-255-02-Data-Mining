@@ -14,3 +14,6 @@ FBI 2014: https://ucr.fbi.gov/crime-in-the-u.s/2014/crime-in-the-u.s.-2014/resou
 
 Education Level in US based on age and gender (2005-2017):
 https://factfinder.census.gov/faces/tableservices/jsf/pages/productview.xhtml?pid=ACS_16_1YR_S1501&prodType=table
+
+County and State based percentage of people with various categories of Highest level of educational attainment:
+https://data.ers.usda.gov/reports.aspx?ID=17829&AspxAutoDetectCookieSupport=1
