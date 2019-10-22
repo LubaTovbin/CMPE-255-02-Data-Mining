@@ -2,12 +2,12 @@
 Data mining for pattern discovery: How income and education levels affect various crime rates?
 
 ## Final Datasets Used (Sources):
-### Income dataset: 
+### Income Dataset:
 #### Location
-Unprocessed: data/kaggle_income.csv
 #### Source
-https://www.kaggle.com/goldenoakresearch/us-household-income-stats-geo-locations#kaggle_income.csv
-Golden Oak Research Group LLC, “U.S. Income Database Kaggle”. Publication: 5, August 2017. Accessed on Oct 2, 2019.
+https://www2.census.gov/library/publications/2011/compendia/usa-counties/excel/INC01.xls
+https://www2.census.gov/library/publications/2011/compendia/usa-counties/excel/INC02.xls
+https://www2.census.gov/library/publications/2011/compendia/usa-counties/excel/INC03.xls
 
 ### Crime dataset:
 #### Location
@@ -28,10 +28,19 @@ All Data: data/other/education/
 Extracted Data: data/us_county_education_data.xlsx
 #### Source
 https://www2.census.gov/library/publications/2011/compendia/usa-counties/excel/EDU02.xls
+
+### US Census All Data
+https://www2.census.gov/library/publications/2011/compendia/usa-counties/zip/
 metadata: https://www2.census.gov/library/publications/2011/compendia/usa-counties/excel/Mastdata.xls
 
-
 #### Obsolete
+### Income dataset(old): 
+#### Location
+Unprocessed: data/kaggle_income.csv
+#### Source
+https://www.kaggle.com/goldenoakresearch/us-household-income-stats-geo-locations#kaggle_income.csv
+Golden Oak Research Group LLC, “U.S. Income Database Kaggle”. Publication: 5, August 2017. Accessed on Oct 2, 2019.
+
 Crime datasets
 https://data.ca.gov/dataset/violent-crime-rate
 https://www.ucrdatatool.gov/Search/Crime/State/StatebyState.cfm
