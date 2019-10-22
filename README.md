@@ -17,3 +17,6 @@ https://factfinder.census.gov/faces/tableservices/jsf/pages/productview.xhtml?pi
 
 County and State based percentage of people with various categories of Highest level of educational attainment:
 https://data.ers.usda.gov/reports.aspx?ID=17829&AspxAutoDetectCookieSupport=1
+
+Education Data Set state wise:
+https://nces.ed.gov/ipeds/Search/ViewTable?tableId=12607&returnUrl=%2Fipeds%2FSearch#
