@@ -11,8 +11,10 @@ https://www.kaggle.com/mikejohnsonjr/united-states-crime-rates-by-county
 
 #### Education dataset:
 https://www2.census.gov/library/publications/2011/compendia/usa-counties/excel/EDU02.xls
+metadata: https://www2.census.gov/library/publications/2011/compendia/usa-counties/excel/Mastdata.xls
 
-#### Obsolete
+
+### Obsolete
 Crime datasets
 https://data.ca.gov/dataset/violent-crime-rate
 https://www.ucrdatatool.gov/Search/Crime/State/StatebyState.cfm
