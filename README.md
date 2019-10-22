@@ -1,20 +1,37 @@
 # CMPE-255-02-Data-Mining
 Data mining for pattern discovery: How income and education levels affect various crime rates?
 
-### Final Datasets Used:
-#### Income dataset: 
+## Final Datasets Used (Sources):
+### Income dataset: 
+#### Location
+Unprocessed: data/kaggle_income.csv
+#### Source
 https://www.kaggle.com/goldenoakresearch/us-household-income-stats-geo-locations#kaggle_income.csv
 Golden Oak Research Group LLC, “U.S. Income Database Kaggle”. Publication: 5, August 2017. Accessed on Oct 2, 2019.
 
-#### Crime dataset:
+### Crime dataset:
+#### Location
+crime_data_w_population_and_crime_rate.csv
+#### Source
 https://www.kaggle.com/mikejohnsonjr/united-states-crime-rates-by-county
 
-#### Education dataset:
+### Crime Alternatives
+#### Location
+FBI 2009: data/other/crime/FBI Crime Data 2009.xls
+FBI 2014: data/other/crime/FBI Crime Data 2014.xls
+#### Source
+https://ucr.fbi.gov/crime-in-the-u.s
+
+### Education dataset (Persons above the age of 25, 2005-2009):
+#### Location
+All Data: data/other/education/
+Extracted Data: data/us_county_education_data.xlsx
+#### Source
 https://www2.census.gov/library/publications/2011/compendia/usa-counties/excel/EDU02.xls
 metadata: https://www2.census.gov/library/publications/2011/compendia/usa-counties/excel/Mastdata.xls
 
 
-### Obsolete
+#### Obsolete
 Crime datasets
 https://data.ca.gov/dataset/violent-crime-rate
 https://www.ucrdatatool.gov/Search/Crime/State/StatebyState.cfm
