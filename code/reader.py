@@ -4,34 +4,44 @@
 # In[6]:
 
 
-from preprocess import get_processed_data
+from preprocess import get_processed_data, LoadViolentCrimeData, LoadPropertyCrimeData, LoadIncomeDistribution
 data = get_processed_data()
 
 
 # In[7]:
 
 
-def get_label(crime_type = "total"):
+def get_label(crime_type = "total", reg = "sqrt_log"):
     """ 
     Returns a county-indexed dataframe of labels(y) based on crime_type
     :param crime_type: {"property", "violent", "total"}
+    :param reg: {"none", "log", "sqrt_log"}
     :return: pandas dataframe
     """
     
+    crime = ""
+    if reg == "log":
+        crime += "Log "
+    elif reg == "sqrt_log":
+        crime += "Root Log "
+        
     if crime_type == "property":
-        return data[["Property Crime"]]
+        crime += "Property Crime"
     
     elif crime_type == "violent":
-        return data[["Violent Crime"]]
-    
+        crime += "Violent Crime"
     else:
-        return data[["Total Crime"]]
+        crime += "Total Crime"
     
-def get_features(education_type="dropout", income_type="mean"):
+    return data[[crime]]
+        
+    
+def get_features(education_type="dropout", income_type="mean", get_high_bracket = True):
     """ 
     Returns a county-indexed dataframe of features(X = [education, income]) based on params
-    :param education_type: {"dropout", "degreeless"}
+    :param education_type: {"dropout", "degreeless", "degree"}
     :param income_type: {"mean", "median", "percapita", "deviation"}
+    :param get_high_bracket: {True, False}
     :return: pandas dataframe
     """
     
@@ -39,8 +49,10 @@ def get_features(education_type="dropout", income_type="mean"):
     
     if education_type == "degreeless":
         feature_columns.append("Percent No Degree")
-    else:
+    elif education_type == "dropout":
         feature_columns.append("Percent High School Dropouts")
+    else:
+        feature_columns.append("Percent Any Degree")
         
     if income_type == "median":
         feature_columns.append("Median Income (Household)")
@@ -51,20 +63,24 @@ def get_features(education_type="dropout", income_type="mean"):
     else:
         feature_columns.append("Mean Income (Household)")
         
+    if get_high_bracket == True:
+        feature_columns.append("High Bracket Income (Household)")
+        
     return data[feature_columns]
 
 
-def get_data(education_type="dropout", income_type="mean", crime_type = "total"):
+def get_data(education_type="dropout", income_type="mean", crime_type = "total", crime_reg = "sqrt_log", get_high_bracket = True):
     """ 
     Returns a county-indexed dataframe of features (education, income) and label (crime) based on params
-    :param education_type: {"dropout", "degreeless"}
+    :param education_type: {"dropout", "degreeless", "degree"}
     :param income_type: {"mean", "median", "percapita", "deviation"}
     :param crime_type: {"property", "violent", "total"}
+    :param crime_reg: {"none", "log", "sqrt_log"}
     :return: pandas dataframe
     """
     
-    label = get_label(crime_type)
-    features = get_features(education_type, income_type)
+    label = get_label(crime_type, crime_reg)
+    features = get_features(education_type, income_type, get_high_bracket)
     
     queried_data = features.merge(label, on="Area_name")
     
@@ -83,6 +99,28 @@ def get_all_data():
     return data
 
 
+def get_us_income_distribution():
+    """
+    Returns the income distribution for all income ranges in the United States
+    :return: pandas series
+    """
+    return LoadIncomeDistribution()
+    
+def get_all_property_crime():
+    """
+    Returns all the property crime data
+    :return: pandas dataframe
+    """
+    return LoadPropertyCrimeData()
+    
+def get_all_violent_crime():
+    """
+    Returns all the violent crime data
+    :return: pandas dataframe
+    """
+    return LoadViolentCrimeData()
+    
+    
 # In[ ]:
 
 

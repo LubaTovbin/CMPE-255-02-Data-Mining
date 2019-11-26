@@ -1,9 +1,14 @@
-#!/usr/bin/env python
-# coding: utf-8
-
-# In[140]:
-
-
+# To add a new cell, type '# %%'
+# To add a new markdown cell, type '# %% [markdown]'
+# %% Change working directory from the workspace root to the ipynb file location. Turn this addition off with the DataScience.changeDirOnImportExport setting
+# ms-python.python added
+import os
+try:
+	os.chdir(os.path.join(os.getcwd(), 'code'))
+	print(os.getcwd())
+except:
+	pass
+# %%
 import pandas as pd
 import numpy as np
 import sys
@@ -14,12 +19,10 @@ import us_state_abbrev as states
 
 base_path = os.path.abspath("..")
 
-
+# %% [markdown]
 # ## Crime
 
-# In[141]:
-
-
+# %%
 crime_path = os.path.join(base_path, 'data/crime/')
 crime_dataframes = [os.path.join(crime_path, file) for file in os.listdir(crime_path)]
 
@@ -51,6 +54,12 @@ def GetCrimeDataFrame(files):
         df["Area_name"] = df.apply(lambda row: GetCrimeCountyNames(row), axis=1)
         df = df.set_index("Area_name")
         df["total crime"] = df.apply(lambda row: row["violent crime"] + row["property crime"], axis=1)
+        df["log violent crime"] = df.apply(lambda row: np.log(row["violent crime"]) if row["violent crime"] != 0 else 0, axis=1)
+        df["log property crime"] = df.apply(lambda row: np.log(row["property crime"]) if row["property crime"] != 0 else 0, axis=1)
+        df["log total crime"] = df.apply(lambda row: np.log(row["total crime"]) if row["total crime"] != 0 else 0, axis=1)
+        df["root log violent crime"] = df.apply(lambda row: np.power(row["log violent crime"], 1/2), axis=1)
+        df["root log property crime"] = df.apply(lambda row: np.power(row["log property crime"], 1/2), axis=1)
+        df["root log total crime"] = df.apply(lambda row: np.power(row["log total crime"], 1/2), axis=1)
         df.head()
         dataframes.append(df)
         
@@ -72,14 +81,23 @@ def GetCrimeDataFrame(files):
 def LoadCrimeData():
     
     crime_data = GetCrimeDataFrame(crime_dataframes)    
-    return crime_data[["Property Crime", "Violent Crime", "Total Crime"]]
+    cols_to_return = ["Property Crime", "Violent Crime", "Total Crime", "Log Property Crime", "Log Violent Crime", "Log Total Crime", "Root Log Property Crime", "Root Log Violent Crime", "Root Log Total Crime"]
+    return crime_data[cols_to_return]
 
+def LoadViolentCrimeData():
+    crime_data = GetCrimeDataFrame(crime_dataframes)    
+    cols_to_return = ["Murder And Nonnegligent Manslaughter", "Forcible Rape", "Robbery", "Aggravated Assault"]
+    return crime_data[cols_to_return]
 
+def LoadPropertyCrimeData():
+    crime_data = GetCrimeDataFrame(crime_dataframes)    
+    cols_to_return = ["Burglary", "Larceny-Theft", "Motor Vehicle Theft", "Arson1"]
+    return crime_data[cols_to_return]
+
+# %% [markdown]
 # ## Education
 
-# In[142]:
-
-
+# %%
 education_path = os.path.join(base_path, 'data/education/')
 
 def GetNoDegree(row):
@@ -128,16 +146,14 @@ def LoadEducationData():
     education_data = GetEducationDataFrame(education_path)
     education_data["Percent High School Dropouts"] = education_data.apply(lambda row: 100.00 - float(row["Percent high school graduate or higher"]), axis=1)
     education_data["Percent No Degree"] = education_data.apply(lambda row: GetNoDegree(row), axis=1)
-#     education_data["Percent Any Degree"] = education_data.apply(lambda row: 100.00 - float(row["Percent No Degree"]), axis=1)
+    education_data["Percent Any Degree"] = education_data.apply(lambda row: 100.00 - float(row["Percent No Degree"]), axis=1)
     
-    return education_data[["Percent High School Dropouts", "Percent No Degree"]]#, "Percent Any Degree"]]
+    return education_data[["Percent High School Dropouts", "Percent No Degree", "Percent Any Degree"]]
 
-
+# %% [markdown]
 # ## Income
 
-# In[155]:
-
-
+# %%
 income_path = os.path.join(base_path, 'data/income/')
 
 def GetIncomeRangeMeans():
@@ -172,15 +188,15 @@ def GetIncomeStdDeviation(row):
     
     total_without = 0
     for c in columns_to_check:
-        values.append(int(income_range_means[c]))
+        values.append(float(income_range_means[c])/1000.0)
         frequencies.append(int(row[c]))
-        total_without += int(row[c]) * int(income_range_means[c])
+        total_without += int(row[c]) * float(income_range_means[c]/1000.0)
     
     remainder = total_income - total_without
     high_bracket_mean = 0
 
     if total_high_bracket != 0:
-        high_bracket_mean = int(remainder/total_high_bracket)
+        high_bracket_mean = float(remainder/total_high_bracket)
     
     values.append(int(high_bracket_mean))
     frequencies.append(int(total_high_bracket))
@@ -188,7 +204,7 @@ def GetIncomeStdDeviation(row):
     overall_income_data = np.repeat(np.array(values), np.array(frequencies))
     std_dev = np.std(overall_income_data, dtype=np.float64, ddof=1)
     
-    return std_dev
+    return std_dev, high_bracket_mean
 
 
 def CleanIncomeAttrName(row):
@@ -224,24 +240,43 @@ def GetIncomeDataFrame(income_path):
     income_data = income_data.rename(columns = {"Mean household income": "Mean Income (Household)",
                                             "Median household income": "Median Income (Household)",
                                            "Per capita income": "Per Capita Income"})
+    income_data["Mean Income (Household)"] = income_data["Mean Income (Household)"].astype(float)/1000.00
+    income_data["Median Income (Household)"] = income_data["Median Income (Household)"].astype(float)/1000.00
+    income_data["Per Capita Income"] = income_data["Per Capita Income"].astype(float)/1000.00
+
+    income_data = income_data.loc[income_data["Mean Income (Household)"] != 0.0]
+    income_data["Income Standard Deviation (Household)"], income_data["High Bracket Income (Household)"] = zip(*income_data.apply(lambda row: GetIncomeStdDeviation(row), axis=1))
+    
     return income_data
 
 
 def LoadIncomeData():
     
     income_data = GetIncomeDataFrame(income_path)
-    income_data["Income Standard Deviation (Household)"] = income_data.apply(lambda row: GetIncomeStdDeviation(row), axis=1)
-    income_data["Income Variance (Household)"] = income_data.apply(lambda row: float(row["Income Standard Deviation (Household)"])**2, axis=1)
-    
     return income_data[["Mean Income (Household)", "Median Income (Household)", 
-                        "Per Capita Income", "Income Standard Deviation (Household)"]]    
+                        "Per Capita Income", "Income Standard Deviation (Household)", "High Bracket Income (Household)"]]   
 
 
+def LoadIncomeDistribution():
+
+    income_data = GetIncomeDataFrame(income_path)
+    income_range_means = GetIncomeRangeMeans()
+    income_range_means["Households with income of \$200,000 or more"] = income_data.loc["UNITED STATES", "High Bracket Income (Household)"]*1000.00
+
+    columns_to_drop = ["Median Income (Household)", "Mean Income (Household)", "Households with income, total", "Per Capita Income",
+       "Income Standard Deviation (Household)", "High Bracket Income (Household)"]
+
+    income_data = income_data.drop(columns_to_drop, axis=1).loc["UNITED STATES"]
+
+    final_data = income_data.rename(lambda x: str(float(income_range_means[x])/1000))
+
+    return final_data
+    
+
+# %% [markdown]
 # ## Processed Data
 
-# In[156]:
-
-
+# %%
 def get_processed_data():
     
     file_path = os.path.join(base_path, 'preprocessed/education_income_crime.xlsx')
@@ -258,34 +293,4 @@ def get_processed_data():
         master_df.to_excel(file_path)
     
     return master_df
-
-
-# In[157]:
-
-
-
-
-
-# In[158]:
-
-
-
-
-
-# In[ ]:
-
-
-
-
-
-# In[ ]:
-
-
-
-
-
-# In[ ]:
-
-
-
 
