@@ -36,7 +36,7 @@ def get_label(crime_type = "total", reg = "sqrt_log"):
     return data[[crime]]
         
     
-def get_features(education_type="dropout", income_type="mean", get_high_bracket = True):
+def get_features(education_type="dropout", income_type="mean", get_high_bracket = False):
     """ 
     Returns a county-indexed dataframe of features(X = [education, income]) based on params
     :param education_type: {"dropout", "degreeless", "degree"}
