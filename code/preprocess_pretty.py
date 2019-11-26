@@ -233,9 +233,10 @@ def GetIncomeDataFrame(income_path):
         income_data.append(column)
 
     income_data = pd.concat(income_data, axis=1)
-    income_data = income_data.rename(columns = {"Mean household income": "Mean Income (Household)",
-                                            "Median household income": "Median Income (Household)",
-                                           "Per capita income": "Per Capita Income"})
+    income_data = income_data.rename(columns = 
+                    {"Mean household income": "Mean Income (Household)",
+                    "Median household income": "Median Income (Household)",
+                    "Per capita income": "Per Capita Income"})
     income_data["Mean Income (Household)"] = income_data["Mean Income (Household)"].astype(float)/1000.00
     income_data["Median Income (Household)"] = income_data["Median Income (Household)"].astype(float)/1000.00
     income_data["Per Capita Income"] = income_data["Per Capita Income"].astype(float)/1000.00
@@ -259,8 +260,9 @@ def LoadIncomeDistribution():
     income_range_means = GetIncomeRangeMeans()
     income_range_means["Households with income of \$200,000 or more"] = income_data.loc["UNITED STATES", "High Bracket Income (Household)"]*1000.00
 
-    columns_to_drop = ["Median Income (Household)", "Mean Income (Household)", "Households with income, total", "Per Capita Income",
-       "Income Standard Deviation (Household)", "High Bracket Income (Household)"]
+    columns_to_drop = ["Median Income (Household)", "Mean Income (Household)", 
+                "Households with income, total", "Per Capita Income",
+                "Income Standard Deviation (Household)", "High Bracket Income (Household)"]
 
     income_data = income_data.drop(columns_to_drop, axis=1).loc["UNITED STATES"]
 
