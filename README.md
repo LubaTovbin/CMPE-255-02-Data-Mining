@@ -10,6 +10,7 @@ For more information, run the following in your code (create file in "code/" fol
 import reader
 help(reader)
 ```
+Run dataVisualizationAndMLmodels.ipynb to visualize the data and run 7 different regression models.
 
 ### us_state_abbrev.py
 Sourced from https://gist.github.com/rogerallen/1583593 in order to map the names of US States to Two Letter Codes
