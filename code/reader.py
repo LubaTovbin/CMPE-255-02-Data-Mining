@@ -4,7 +4,7 @@
 # In[6]:
 
 
-from preprocess import get_processed_data, LoadViolentCrimeData, LoadPropertyCrimeData, LoadIncomeDistribution
+from preprocess import get_processed_data, LoadViolentCrimeData, LoadPropertyCrimeData, LoadIncomeDistribution, LoadEducationData
 data = get_processed_data()
 
 
@@ -119,6 +119,13 @@ def get_all_violent_crime():
     :return: pandas dataframe
     """
     return LoadViolentCrimeData()
+
+def get_all_education_data():
+    """
+    Returns all education data (states included)
+    :return: pandas dataframe
+    """
+    return LoadEducationData()
     
     
 # In[ ]:
