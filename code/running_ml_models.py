@@ -22,6 +22,13 @@ from matplotlib import pyplot as plt
 get_ipython().run_line_magic('matplotlib', 'inline')
 import seaborn as sns
 
+from sklearn.tree import DecisionTreeRegressor
+from sklearn.ensemble import RandomForestRegressor, GradientBoostingRegressor
+from sklearn.neighbors import KNeighborsRegressor
+from sklearn.svm import SVR
+from sklearn.preprocessing import StandardScaler
+from sklearn.model_selection import ParameterGrid
+
 # %% [markdown]
 # #### Loading the dataset
 
@@ -65,13 +72,6 @@ class Row(object):
 # #### Applying models
 
 # %%
-from sklearn.tree import DecisionTreeRegressor
-from sklearn.ensemble import RandomForestRegressor, GradientBoostingRegressor
-from sklearn.neighbors import KNeighborsRegressor
-from sklearn.svm import SVR
-from sklearn.preprocessing import StandardScaler
-from sklearn.model_selection import ParameterGrid
-
 import warnings
 warnings.filterwarnings("ignore")
 
@@ -146,7 +146,7 @@ result
 
 # %%
 X = reader.get_features("dropout", "median")
-y = reader.get_label('total', "log")
+y = reader.get_label('total', "sqrt_log")
 y=np.power(y,1/2)
 X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=0)
 
@@ -170,8 +170,8 @@ print("Support Vectors : \n", SV)
 # #### Linear Regression
 
 # %%
-X = reader.get_features("degree", "median")
-y = reader.get_label('total', "log")
+X = reader.get_features("dropout", "median")
+y = reader.get_label('total', "sqrt_log")
 y=np.power(y,1/2)
 X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=0)
 
@@ -185,6 +185,30 @@ y_pred=linreg.predict(X_test)
 print(metrics.mean_squared_error(y_test, y_pred))
 
 linreg.coef_
+
+# %% [markdown]
+# #### Linear SVR
+
+# %%
+from sklearn.svm import LinearSVR
+
+X = reader.get_features("dropout", "median")
+y = reader.get_label('total', "sqrt_log")
+y=np.power(y,1/2)
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=0)
+
+scaler = StandardScaler()
+X_train = scaler.fit_transform(X_train.to_numpy())
+X_test = scaler.fit_transform(X_test.to_numpy())
+
+
+svr = LinearSVR(C=0.0005)
+svr = svr.fit(X_train, y_train.values.ravel())
+y_pred=svr.predict(X_test)
+
+print(metrics.mean_squared_error(y_test, y_pred))
+SV=svr.coef_
+print("Weights : \n", SV)
 
 
 # %%
