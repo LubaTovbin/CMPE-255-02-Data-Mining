@@ -38,7 +38,19 @@ def GetCrimeCountyNames(row):
     
     full_county = county + ", " + state_code.strip()
     
-    return full_county
+    return full_county, state.upper()
+
+def TransformData(crime_data):
+    
+    crime_data["Log Violent Crime"] = crime_data.apply(lambda row: np.log1p(row["Violent Crime"]) if int(row["Violent Crime"]) != 0 else 0, axis=1)
+    crime_data["Log Property Crime"] = crime_data.apply(lambda row: np.log1p(row["Property Crime"]) if int(row["Property Crime"]) != 0 else 0, axis=1)
+    crime_data["Log Total Crime"] = crime_data.apply(lambda row: np.log1p(row["Total Crime"]) if int(row["Total Crime"]) != 0 else 0, axis=1)
+    crime_data["Root Log Violent Crime"] = crime_data.apply(lambda row: np.power(row["Log Violent Crime"], 1/2), axis=1)
+    crime_data["Root Log Property Crime"] = crime_data.apply(lambda row: np.power(row["Log Property Crime"], 1/2), axis=1)
+    crime_data["Root Log Total Crime"] = crime_data.apply(lambda row: np.power(row["Log Total Crime"], 1/2), axis=1)
+
+    return crime_data
+
 
 def GetCrimeDataFrame(files):
     
@@ -47,46 +59,51 @@ def GetCrimeDataFrame(files):
     for file in files:
         df = pd.read_excel(file, index_col=[0,1], index_row=0, encoding='utf-8')
         df.columns = df.columns.str.lower()
-        df["Area_name"] = df.apply(lambda row: GetCrimeCountyNames(row), axis=1)
+        df["Area_name"], df["state"] = zip(*df.apply(lambda row: GetCrimeCountyNames(row), axis=1))
         df = df.set_index("Area_name")
         df["total crime"] = df.apply(lambda row: row["violent crime"] + row["property crime"], axis=1)
-        df["log violent crime"] = df.apply(lambda row: np.log1p(row["violent crime"]) if row["violent crime"] != 0 else 0, axis=1)
-        df["log property crime"] = df.apply(lambda row: np.log1p(row["property crime"]) if row["property crime"] != 0 else 0, axis=1)
-        df["log total crime"] = df.apply(lambda row: np.log1p(row["total crime"]) if row["total crime"] != 0 else 0, axis=1)
-        df["root log violent crime"] = df.apply(lambda row: np.power(row["log violent crime"], 1/2), axis=1)
-        df["root log property crime"] = df.apply(lambda row: np.power(row["log property crime"], 1/2), axis=1)
-        df["root log total crime"] = df.apply(lambda row: np.power(row["log total crime"], 1/2), axis=1)
         df.head()
         dataframes.append(df)
         
     final_columns = list(set.intersection(*map(set, [dframe.columns.tolist() for dframe in dataframes])))
     crime_data = pd.concat(dataframes, sort=False)
+
+    state_map = crime_data[["state"]].reset_index().drop_duplicates().set_index("Area_name")
+    crime_data = crime_data.drop(columns=["state"])
     
     by_row_index = crime_data.groupby(crime_data.index)
     crime_data = by_row_index.mean()
     
+    final_columns = [col for col in final_columns if col != "state"]
     crime_data = crime_data[final_columns]
+    
     final_columns = [col.title() for col in final_columns]
     crime_data.columns = final_columns
     
     crime_data = crime_data.fillna(0)
     crime_data = crime_data.loc[crime_data["Total Crime"] != 0.0]
     
-    return crime_data
+    return crime_data, state_map
 
 def LoadCrimeData():
     
-    crime_data = GetCrimeDataFrame(crime_dataframes)    
+    crime_data, state_map = GetCrimeDataFrame(crime_dataframes)    
+    
+    crime_data = TransformData(crime_data)
+
     cols_to_return = ["Property Crime", "Violent Crime", "Total Crime", "Log Property Crime", "Log Violent Crime", "Log Total Crime", "Root Log Property Crime", "Root Log Violent Crime", "Root Log Total Crime"]
+    
     return crime_data[cols_to_return]
 
 def LoadViolentCrimeData():
     crime_data = GetCrimeDataFrame(crime_dataframes)    
+    crime_data = TransformData(crime_data)
     cols_to_return = ["Murder And Nonnegligent Manslaughter", "Forcible Rape", "Robbery", "Aggravated Assault"]
     return crime_data[cols_to_return]
 
 def LoadPropertyCrimeData():
     crime_data = GetCrimeDataFrame(crime_dataframes)    
+    crime_data = TransformData(crime_data)
     cols_to_return = ["Burglary", "Larceny-Theft", "Motor Vehicle Theft", "Arson1"]
     return crime_data[cols_to_return]
 
@@ -99,7 +116,7 @@ education_path = os.path.join(base_path, 'data/education/')
 def GetNoDegree(row):
     
     total = int(row["Total"])
-    no_degree = int(row["Completing less than 9th grade"]) + int(row["High school graduate (includes equivalency)"]) + int(row["Some college, no degree"])
+    no_degree = int(row["High school graduate (includes equivalency)"]) + int(row["Some college, no degree"])
     return ((1.00 - (float(no_degree)/float(total)))*100)
 
 
@@ -142,7 +159,7 @@ def LoadEducationData():
     education_data = GetEducationDataFrame(education_path)
     education_data["Percent High School Dropouts"] = education_data.apply(lambda row: 100.00 - float(row["Percent high school graduate or higher"]), axis=1)
     education_data["Percent No Degree"] = education_data.apply(lambda row: GetNoDegree(row), axis=1)
-    education_data["Percent Any Degree"] = education_data.apply(lambda row: 100.00 - float(row["Percent No Degree"]), axis=1)
+    education_data["Percent Any Degree"] = education_data.apply(lambda row: 100.00 - float(row["Percent No Degree"]) - float(row["Percent High School Dropouts"]), axis=1)
     
     return education_data[["Percent High School Dropouts", "Percent No Degree", "Percent Any Degree"]]
 
@@ -264,7 +281,7 @@ def LoadIncomeDistribution():
 
     income_data = income_data.drop(columns_to_drop, axis=1).loc["UNITED STATES"]
 
-    final_data = income_data.rename(lambda x: str(float(income_range_means[x])/1000))
+    final_data = income_data.rename(lambda x: float(income_range_means[x])/1000)
 
     return final_data
     
@@ -290,3 +307,26 @@ def get_processed_data():
     
     return master_df
 
+
+# %%
+def get_processed_data_state():
+     
+    file_path = os.path.join(base_path, 'preprocessed/education_income_crime_by_state.xlsx')
+    
+    if os.path.exists(file_path):
+        master_df_state = pd.read_excel(file_path, index_col=0)
+    
+    else:
+        crime_data, state_map = GetCrimeDataFrame(crime_dataframes)
+        crime_data = crime_data.merge(state_map, left_index=True, right_index=True).reset_index().drop(columns=["Area_name"])
+        crime_data = crime_data.groupby(["state"]).sum().reset_index().rename(columns={"state": "Area_name"})
+        crime_data.set_index("Area_name")
+        crime_data = TransformData(crime_data)
+
+        education_data = LoadEducationData()
+        income_data = LoadIncomeData()     
+
+        master_df_state = crime_data.merge(income_data, on="Area_name").merge(education_data, on="Area_name")
+        master_df_state.to_excel(file_path)
+
+    return master_df_state
